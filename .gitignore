@@ -1,3 +1,7 @@
 # Ignore emacs files
 /#*
 *~
+
+#Added by cargo
+
+/target
