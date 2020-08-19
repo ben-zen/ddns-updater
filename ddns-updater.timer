@@ -1,0 +1,5 @@
+[Unit]
+Description=Run ddns-updater.service once daily
+
+[Timer]
+OnCalendar=*:00:00

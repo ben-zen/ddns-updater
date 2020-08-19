@@ -1,0 +1,6 @@
+[Unit]
+Description=Updates Dynamic DNS records.
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/local/ddns-updater
