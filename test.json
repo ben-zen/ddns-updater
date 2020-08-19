@@ -1,0 +1,8 @@
+{
+  "dns_records": [
+    { "host": "demo.example.com",
+      "key": "demo-secret"},
+    { "host": "demo1.example.com",
+      "key": "demo1-secret"}
+  ]
+}
