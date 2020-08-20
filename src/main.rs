@@ -1,57 +1,36 @@
 mod settings;
 mod updater;
 
-use std::env;
+use std::path::PathBuf;
+use structopt::StructOpt;
 
-enum Action {
-  NoOp, // -h results in NoOp
-  Update,
-  WhatIf // -whatif results in printing actions but not updating
+#[derive(StructOpt)]
+#[structopt(rename_all = "kebab-case")]
+struct Config {
+  #[structopt(default_value="test.toml", parse(from_os_str), long)]
+  source_path: PathBuf,
+  #[structopt(long, short)]
+  what_if: bool,
+  #[structopt(long, short)]
+  verbose: bool
 }
-
-enum Options {
-  Folder(String),
-  Verbose
-}
-
-fn read_arguments () -> (Action, Vec<Options>) {
-  // do I do this lispy or not?
-
-  let mut action = Action::Update;
-  for arg in env::args() {
-    if arg.eq("-h") {
-      action = Action::NoOp;
-    }
-    if arg.eq("-whatif") {
-      action = Action::WhatIf;
-    }
-  }
-  (action, vec![])
-}
-
+      
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-  let conf = settings::Settings::new()?;
-
-  let (action, options) = read_arguments();
-  // find a "what if" option and print the actions that would be taken
-
-  match action {
-    Action::NoOp => { Ok(()) }
-    Action::Update => {
-      let client = reqwest::Client::new();
-      for dns_record in conf.dns_records {
-        updater::update_ddns_record(&client,
-                                    &dns_record.host,
-                                    &dns_record.key).await?;
-      }
-      Ok(())
+  
+  let args = Config::from_args();
+  let records = settings::parse(&args.source_path).unwrap();
+  if args.what_if {
+    for (_, dns_record) in records {
+      println!("Update A record for {:?}", dns_record.host);
     }
-    Action::WhatIf => {
-      for dns_record in conf.dns_records {
-        println!("Update A record for {:?}", dns_record.host);
-      }
-      Ok(())
+  } else {
+    let client = reqwest::Client::new();
+    for (_, dns_record) in records {
+      updater::update_ddns_record(&client,
+                                  &dns_record.host,
+                                  &dns_record.key).await?;
     }
   }
+  Ok(())
 }

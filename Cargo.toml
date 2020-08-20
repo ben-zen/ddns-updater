@@ -11,4 +11,6 @@ config = { version = "0.9", features = [ "json" ] }
 reqwest = { version = "0.10", features = [ "blocking", "json" ] }
 serde = { version = "1.0", features = [ "derive" ] }
 serde_derive = { version = "1.0" }
+structopt = { version = "0.3" }
 tokio = { version = "0.2", features = [ "macros", "rt-threaded" ] }
+toml = { version = "0.5" }

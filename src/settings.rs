@@ -1,5 +1,6 @@
-use config::{ConfigError, Config, File};
 use serde::{Deserialize};
+use std::collections::HashMap;
+use std::path::Path;
 
 #[derive(Debug, Deserialize)]
 pub struct DNSRecord {
@@ -7,24 +8,14 @@ pub struct DNSRecord {
   pub key: String
 }
 
-#[derive(Debug, Deserialize)]
-pub struct Settings {
-  pub debug: bool,
-//  #[serde(rename="dns_record")]  
-  pub dns_records: Vec<DNSRecord>
-}
-
-impl Settings {
-  pub fn new() -> Result<Self, ConfigError> {
-    let mut s = Config::new();
-    s.merge(File::with_name("test"))?;
-    println!("{:#?}", s);
-    s.merge(File::with_name("test1"))?;
-
-    s.set("debug", false)?;
-
-    println!("{:#?}", s);
-
-    s.try_into()
+pub fn parse(source_path : &Path) -> Result<HashMap<String, DNSRecord>, toml::de::Error> {
+  // If we the provided path is one file, only open that file.
+  // Otherwise, find all .toml files in the directory
+  if source_path.is_file() {
+    let source_data = std::fs::read(source_path).unwrap();
+    toml::from_slice(&source_data) as Result<HashMap<String, DNSRecord>, toml::de::Error>
+  } else {
+    // Get all toml files in the directory and parse them each as above.
+    panic!("Unimplemented yet.");
   }
 }  
