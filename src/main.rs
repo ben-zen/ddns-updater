@@ -1,4 +1,4 @@
-mod settings;
+mod records;
 mod updater;
 
 use std::path::PathBuf;
@@ -14,12 +14,12 @@ struct Config {
   #[structopt(long, short)]
   verbose: bool
 }
-      
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
   
   let args = Config::from_args();
-  let records = settings::parse(&args.source_path).unwrap();
+  let records = records::parse(&args.source_path).unwrap();
   if args.what_if {
     for (_, dns_record) in records {
       println!("Update A record for {:?}", dns_record.host);
