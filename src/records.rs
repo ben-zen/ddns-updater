@@ -1,5 +1,8 @@
 use serde::{Deserialize};
 use std::collections::HashMap;
+use std::convert::From;
+use std::fmt;
+use std::fs;
 use std::path::Path;
 
 #[derive(Debug, Deserialize)]
@@ -8,14 +11,75 @@ pub struct DNSRecord {
   pub key: String
 }
 
-pub fn parse(source_path : &Path) -> Result<HashMap<String, DNSRecord>, toml::de::Error> {
+#[derive(Debug)]
+pub enum Error {
+  IoError(std::io::Error),
+  TomlError(toml::de::Error)
+}
+
+// Implement the From trait for both toml::de::Error and std::io::Error
+impl From<toml::de::Error> for Error {
+  fn from(err : toml::de::Error) -> Self {
+    Error::TomlError(err)
+  }
+}
+
+impl From<std::io::Error> for Error {
+  fn from(err : std::io::Error) -> Self {
+    Error::IoError(err)
+  }
+}
+
+impl std::error::Error for Error {
+  fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+    Some(self)
+  }
+}
+
+impl fmt::Display for Error {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      Error::IoError(err) => {
+        write!(f, "{}", err)
+      }
+      Error::TomlError(err) => {
+        write!(f, "{}", err)
+      }
+    }
+  }
+}
+
+fn parse_slice(slice: &[u8]) -> Result<HashMap<String, DNSRecord>,
+                                      Error> {
+  match toml::from_slice(slice) {
+    Ok(m) => { Ok(m) }
+    Err(e) => { Err(Error::TomlError(e)) }
+  }
+}
+
+pub fn parse(source_path : &Path) -> Result<HashMap<String, DNSRecord>,
+                                            Error> {
   // If we the provided path is one file, only open that file.
   // Otherwise, find all .toml files in the directory
   if source_path.is_file() {
-    let source_data = std::fs::read(source_path).unwrap();
-    toml::from_slice(&source_data) as Result<HashMap<String, DNSRecord>, toml::de::Error>
-  } else {
+    let source_data = fs::read(source_path)?;
+    parse_slice(&source_data)
+  } else if source_path.is_dir() {
     // Get all toml files in the directory and parse them each as above.
-    panic!("Unimplemented yet.");
+    let mut records : HashMap<String, DNSRecord> = HashMap::new();
+    for entry in fs::read_dir(source_path)? {
+      let entry = entry?;
+      let path = entry.path();
+      if path.is_file() {
+        println!("Loading from {:?}", path);
+        let data = std::fs::read(path)?;
+        let file_records = parse_slice(&data)?;
+        records.extend(file_records);
+      }
+    }
+    Ok(records)
+  } else {
+    panic!("Not file, not folder. Something's up with this path: {:?}",
+           source_path);
   }
 }  

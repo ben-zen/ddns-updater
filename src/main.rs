@@ -19,7 +19,7 @@ struct Config {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
   
   let args = Config::from_args();
-  let records = records::parse(&args.source_path).unwrap();
+  let records = records::parse(&args.source_path)?;
   if args.what_if {
     for (_, dns_record) in records {
       println!("Update A record for {:?}", dns_record.host);
