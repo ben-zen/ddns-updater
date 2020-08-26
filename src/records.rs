@@ -1,6 +1,7 @@
 use serde::{Deserialize};
 use std::collections::HashMap;
 use std::convert::From;
+use std::ffi::OsStr;
 use std::fmt;
 use std::fs;
 use std::path::Path;
@@ -14,6 +15,7 @@ pub struct DNSRecord {
 #[derive(Debug)]
 pub enum Error {
   IoError(std::io::Error),
+  PathError(String),
   TomlError(toml::de::Error)
 }
 
@@ -42,6 +44,9 @@ impl fmt::Display for Error {
       Error::IoError(err) => {
         write!(f, "{}", err)
       }
+      Error::PathError(err) => {
+        write!(f, "Unexpected path: {}", err)
+      }
       Error::TomlError(err) => {
         write!(f, "{}", err)
       }
@@ -62,8 +67,15 @@ pub fn parse(source_path : &Path) -> Result<HashMap<String, DNSRecord>,
   // If we the provided path is one file, only open that file.
   // Otherwise, find all .toml files in the directory
   if source_path.is_file() {
-    let source_data = fs::read(source_path)?;
-    parse_slice(&source_data)
+    if Some(OsStr::new("toml")) == source_path.extension() {
+      let source_data = fs::read(source_path)?;
+      parse_slice(&source_data)
+    } else {
+      // This will look a little messy, but paths aren't necessarily UTF-8, and
+      // strings in Rust necessarily are. So we'll get a Cow<str> and then get a
+      // String out of that.
+      Err(Error::PathError(source_path.to_string_lossy().to_string()))
+    }
   } else if source_path.is_dir() {
     // Get all toml files in the directory and parse them each as above.
     let mut records : HashMap<String, DNSRecord> = HashMap::new();
@@ -71,10 +83,12 @@ pub fn parse(source_path : &Path) -> Result<HashMap<String, DNSRecord>,
       let entry = entry?;
       let path = entry.path();
       if path.is_file() {
-        println!("Loading from {:?}", path);
-        let data = std::fs::read(path)?;
-        let file_records = parse_slice(&data)?;
-        records.extend(file_records);
+        if Some(OsStr::new("toml")) == path.extension() {
+          println!("Loading from {:?}", path);
+          let data = std::fs::read(path)?;
+          let file_records = parse_slice(&data)?;
+          records.extend(file_records);
+        }
       }
     }
     Ok(records)

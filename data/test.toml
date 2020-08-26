@@ -1,0 +1,8 @@
+[demo-example-com]
+host = "demo.example.com"
+key = "demo-secret"
+
+[demo1-example-com]
+host = "demo1.example.com"
+key = "demo1-secret"
+
