@@ -1,5 +1,5 @@
 [Unit]
-Description=Updates Dynamic DNS records.
+Description=Update Dynamic DNS records
 After=network.target
 
 [Service]
