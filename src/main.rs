@@ -7,12 +7,10 @@ use structopt::StructOpt;
 #[derive(StructOpt)]
 #[structopt(rename_all = "kebab-case")]
 struct Config {
-  #[structopt(default_value="test.toml", parse(from_os_str), long)]
+  #[structopt(parse(from_os_str), long)]
   source_path: PathBuf,
   #[structopt(long, short)]
-  what_if: bool,
-  #[structopt(long, short)]
-  verbose: bool
+  what_if: bool
 }
 
 #[tokio::main]

@@ -97,3 +97,69 @@ pub fn parse(source_path : &Path) -> Result<HashMap<String, DNSRecord>,
            source_path);
   }
 }  
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  
+  #[test]
+  fn parse_single_record() -> Result<(), Error> {
+    let toml_string = r"
+[demo]
+host = 'demo.example.org'
+key = 'demo-secret'
+";
+    let records = parse_slice(toml_string.as_bytes())?;
+    assert_eq!(records.len(), 1); 
+    assert_eq!(records.values().next().unwrap().host, "demo.example.org");
+    Ok(())
+  }
+
+  #[test]
+  fn fail_parsing_malformed_record() -> Result<(), Error> {
+    let toml_string = r"
+[demo]
+host = 'demo.example.org'
+";
+    matches::assert_matches!(parse_slice(toml_string.as_bytes()),
+                             Result::Err(Error::TomlError(_)));
+    Ok(())
+  }
+
+  #[test]
+  fn parse_multiple_records() -> Result<(), Error> {
+    let toml_string = r"
+[demo]
+host = 'demo1.example.org'
+key = 'demo1-secret'
+
+[other-demo]
+host = 'demo2.example.org'
+key = 'demo2-secret'
+";
+    let records = parse_slice(toml_string.as_bytes())?;
+    assert_eq!(records.len(), 2);
+    assert_eq!(records["demo"].host, "demo1.example.org");
+    assert_eq!(records["other-demo"].host, "demo2.example.org");
+    Ok(())
+  }
+
+  #[test]
+  fn read_single_file() -> Result<(), Error> {
+    let records = parse(Path::new("./data/test.toml"))?;
+    assert_eq!(records.len(), 2);
+    assert_eq!(records["demo-example-com"].host, "demo.example.com");
+    assert_eq!(records["demo1-example-com"].host, "demo1.example.com");
+    Ok(())
+  }
+
+  #[test]
+  fn read_all_files_in_dir() -> Result<(), Error> {
+    let records = parse(Path::new("./data"))?;
+    assert_eq!(records.len(), 3);
+    // I didn't want to check all the others.
+    assert_eq!(records["demo2"].host, "demo2.example.com");
+    Ok(())
+  }
+}
+    

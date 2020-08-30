@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 config = { version = "0.9", features = [ "json" ] }
+matches = { version = "0.1" }
 reqwest = { version = "0.10", features = [ "blocking", "json" ] }
 serde = { version = "1.0", features = [ "derive" ] }
 serde_derive = { version = "1.0" }
