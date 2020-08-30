@@ -1,6 +1,8 @@
 [Unit]
 Description=Updates Dynamic DNS records.
+After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/local/ddns-updater
+User=CHANGE_ME
+ExecStart=/usr/bin/local/ddns-updater --source-path=/srv/ddns

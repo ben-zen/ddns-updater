@@ -16,6 +16,22 @@ All comments should be unique, and should not contain periods. Technically in
 TOML, what we're using as a comment is actually a key in the overall key-value
 tree, and this results in some unfortunate emergent behaviors.
 
+## Deploying ##
+
+Build then install the binary:
+```sh
+$ cargo build --release
+$ sudo cp target/release/ddns-updater /usr/bin/local/ddns-updater
+```
+
+The included `.service` file requires an edit to define the user the script will
+run under, and then should be installed in
+`/etc/systemd/system/ddns-updater.service` similarly.
+
+Finally, build your configuration file like the files in the `data` directory,
+and install them either in `/srv/ddns`, the default location for the script, or
+in your location of choice.
+
 ## Future plans ##
 
 - Support for more record types. The default will remain A records, with
