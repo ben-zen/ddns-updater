@@ -18,17 +18,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   
   let args = Config::from_args();
   let records = records::parse(&args.source_path)?;
-  if args.what_if {
-    for (_, dns_record) in records {
-      println!("Update A record for {:?}", dns_record.host);
-    }
-  } else {
-    let client = reqwest::Client::new();
-    for (_, dns_record) in records {
-      updater::update_ddns_record(&client,
-                                  &dns_record.host,
-                                  &dns_record.key).await?;
-    }
+  for record in records.values() {
+    updater::update_ddns_record(&record,
+                                args.what_if).await?;
   }
   Ok(())
 }

@@ -7,9 +7,33 @@ use std::fs;
 use std::path::Path;
 
 #[derive(Debug, Deserialize)]
+pub enum RecordType {
+  A,
+  AAAA
+}
+
+impl Default for RecordType {
+  fn default() -> Self {
+    RecordType::A
+  }
+}
+
+impl std::fmt::Display for RecordType {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{}", match self {
+      RecordType::A => { "A" }
+      RecordType::AAAA => { "AAAA" }
+    })
+  }
+}
+
+#[derive(Debug, Deserialize)]
 pub struct DNSRecord {
   pub host: String,
-  pub key: String
+  pub key: String,
+  pub interface: String,
+  #[serde(default)]
+  pub record_type: RecordType
 }
 
 #[derive(Debug)]
@@ -108,6 +132,7 @@ mod tests {
 [demo]
 host = 'demo.example.org'
 key = 'demo-secret'
+interface = 'enp3s0'
 ";
     let records = parse_slice(toml_string.as_bytes())?;
     assert_eq!(records.len(), 1); 
@@ -127,15 +152,31 @@ host = 'demo.example.org'
   }
 
   #[test]
+  fn parse_ipv6_record() -> Result<(), Error> {
+    let toml_string = r"
+[demo]
+host = 'demo.example.org'
+key = 'demo-secret'
+interface = 'enp3s0'
+record_type = 'AAAA'
+";
+    let records = parse_slice(toml_string.as_bytes())?;
+    matches::assert_matches!(records["demo"].record_type, RecordType::AAAA);
+    Ok(())
+  }
+
+  #[test]
   fn parse_multiple_records() -> Result<(), Error> {
     let toml_string = r"
 [demo]
 host = 'demo1.example.org'
 key = 'demo1-secret'
+interface = 'enp3s0'
 
 [other-demo]
 host = 'demo2.example.org'
 key = 'demo2-secret'
+interface = 'enp3s0'
 ";
     let records = parse_slice(toml_string.as_bytes())?;
     assert_eq!(records.len(), 2);

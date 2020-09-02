@@ -1,3 +1,4 @@
 [demo2]
 host = "demo2.example.com"
 key = "demo2-secret"
+interface = "enp3s0"
