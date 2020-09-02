@@ -1,5 +1,9 @@
 [Unit]
-Description=Run ddns-updater.service once daily
+Description=Run ddns-updater once an hour to limit downtime
 
 [Timer]
-OnCalendar=*:00:00
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

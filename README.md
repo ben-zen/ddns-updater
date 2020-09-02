@@ -25,8 +25,15 @@ $ sudo cp target/release/ddns-updater /usr/bin/local/ddns-updater
 ```
 
 The included `.service` file requires an edit to define the user the script will
-run under, and then should be installed in
-`/etc/systemd/system/ddns-updater.service` similarly.
+run under, and then both it and the `.timer` file should be installed in
+`/etc/systemd/system/`. Then, with a few `systemctl` calls, you can set up the
+updater to run automatically on the hour:
+
+```sh
+\# systemctl enable ddns-updater.timer
+\# systemctl start ddns-updater.timer
+$ systemctl status ddns-updater
+```
 
 Finally, build your configuration file like the files in the `data` directory,
 and install them either in `/srv/ddns`, the default location for the script, or
