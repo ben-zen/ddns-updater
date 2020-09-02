@@ -10,6 +10,8 @@ format:
 [comment]
 host = "host-name"
 key = "secret-key"
+interface = "enp3s0"
+record_type = "A"
 ```
 
 All comments should be unique, and should not contain periods. Technically in
@@ -30,8 +32,8 @@ run under, and then both it and the `.timer` file should be installed in
 updater to run automatically on the hour:
 
 ```sh
-\# systemctl enable ddns-updater.timer
-\# systemctl start ddns-updater.timer
+# systemctl enable ddns-updater.timer
+# systemctl start ddns-updater.timer
 $ systemctl status ddns-updater
 ```
 
