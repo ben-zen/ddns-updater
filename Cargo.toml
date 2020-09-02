@@ -10,6 +10,7 @@ keywords = ["dns"]
 
 [dependencies]
 config = { version = "0.9", features = [ "json" ] }
+ipnetwork = { version = "0.16" }
 matches = { version = "0.1" }
 pnet = { version = "0.26" }
 reqwest = { version = "0.10", features = [ "blocking", "json" ] }

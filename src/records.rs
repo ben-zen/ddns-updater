@@ -18,6 +18,15 @@ impl Default for RecordType {
   }
 }
 
+impl std::fmt::Display for RecordType {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{}", match self {
+      RecordType::A => { "A" }
+      RecordType::AAAA => { "AAAA" }
+    })
+  }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct DNSRecord {
   pub host: String,
