@@ -1,6 +1,6 @@
 [package]
 name = "ddns-updater"
-version = "1.0.0"
+version = "1.2.0"
 authors = ["Ben Lewis <1884340+ben-zen@users.noreply.github.com>"]
 edition = "2021"
 license = "MIT"
