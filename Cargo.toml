@@ -13,7 +13,7 @@ config = { version = "0.9", features = [ "json" ] }
 ipnetwork = { version = "0.16" }
 matches = { version = "0.1" }
 pnet = { version = "0.26" }
-reqwest = { version = "0.10", features = [ "blocking", "json" ] }
+reqwest = { version = "0.11.11", features = [ "json" ] }
 dnsclient = { version="0.1.17" }
 serde = { version = "1.0", features = [ "derive" ] }
 serde_derive = { version = "1.0" }

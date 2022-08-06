@@ -24,12 +24,8 @@ fn get_ip_for_interface_by_record_type(
   }
 }
 
-pub async fn update_ddns_record(record: &records::DNSRecord, what_if: bool)
+pub async fn update_ddns_record(record: &records::DNSRecord, ip_lookup_addr: &str, what_if: bool)
                                 -> Result<(), Box<dyn std::error::Error>> {
-  if what_if {
-    println!("Update {} record for {} via {}.", record.record_type, record.host, record.interface);
-    Ok(())
-  } else {
 
     let interfaces = pnet::datalink::interfaces();
     // Find the interface for the record
@@ -62,7 +58,8 @@ pub async fn update_ddns_record(record: &records::DNSRecord, what_if: bool)
       .build()?;
     
     // We want to check what our current public IP address is, too.
-    let ip_lookup_result = client.get("https://api.ipify.org/").send().await?;
+    println!("Querying {} for this machine's current public address.", ip_lookup_addr);
+    let ip_lookup_result = client.get(ip_lookup_addr).send().await?;
     let ip_lookup = match ip_lookup_result.status().is_success() {
       true => match ip_lookup_result.text().await?.parse::<IpAddr>() {
         Ok(x) => { Some(x) }
@@ -81,8 +78,10 @@ pub async fn update_ddns_record(record: &records::DNSRecord, what_if: bool)
     
     // Now we want to check, do we have an address already presented for this domain?
     if let Some(current_ip) = ip_lookup {
+      println!("Got our current address, checking for a match: {}", current_ip);
       if let Some(addresses) = current_addresses_opt {
         for address in addresses {
+          println!("Checking {} against current public address {}", address, current_ip);
           if address == current_ip {
             println!("Found the current address, not updating.");
             run_update = false;
@@ -92,8 +91,9 @@ pub async fn update_ddns_record(record: &records::DNSRecord, what_if: bool)
       }
     }
 
-    if run_update 
-    {
+    if what_if && run_update {
+      println!("If run, update the {} record for {}", record.record_type, record.host);
+    } else if run_update {
       let res = client.post("https://dyn.dns.he.net/nic/update")
         .form(&[("hostname", &record.host), ("password", &record.key)])
         .send()
@@ -105,5 +105,4 @@ pub async fn update_ddns_record(record: &records::DNSRecord, what_if: bool)
       println!("Request body: {:?}", res_text);
     }
     Ok(())
-  }
 }
