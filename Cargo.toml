@@ -2,7 +2,7 @@
 name = "ddns-updater"
 version = "1.0.0"
 authors = ["Ben Lewis <1884340+ben-zen@users.noreply.github.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 keywords = ["dns"]
 
@@ -13,9 +13,10 @@ config = { version = "0.9", features = [ "json" ] }
 ipnetwork = { version = "0.16" }
 matches = { version = "0.1" }
 pnet = { version = "0.26" }
-reqwest = { version = "0.10", features = [ "blocking", "json" ] }
+reqwest = { version = "0.11.11", features = [ "json" ] }
+dnsclient = { version="0.1.17" }
 serde = { version = "1.0", features = [ "derive" ] }
 serde_derive = { version = "1.0" }
 structopt = { version = "0.3" }
-tokio = { version = "0.2", features = [ "macros", "rt-threaded" ] }
+tokio = { version = "1", features = [ "full" ] }
 toml = { version = "0.5" }

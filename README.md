@@ -1,6 +1,8 @@
 # ddns-updater #
 
-It updates Hurricane Electric dynamic DNS records, ideally as a service.
+A Hurricane Electric dynamic DNS record updater, designed to be run as a service on Linux, with example SystemD unit files provided.
+
+This implementation has checks to not try to update a record if it's currently the same address; this reduces the traffic to the DDNS service. The default endpoint for this is [ifconfig.me](https://ifconfig.me/ip/), but any service which returns a plaintext body in an HTTP response that only contains the requesting client's IP address will work.
 
 ## Configuration format ##
 
